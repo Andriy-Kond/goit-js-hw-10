@@ -1,11 +1,12 @@
 const END_POINT = 'https://restcountries.com/v2/name/';
 
-// const searchParams = new URLSearchParams({
-//   name,
-// });
+const searchParams = new URLSearchParams({
+  fields: 'name,capital,population,flags,languages',
+});
 
 function fetchCountries(inputData) {
-  return fetch(`${END_POINT}/${inputData}?fields=name,capital,population,flags,languages`).then(
+  return fetch(`${END_POINT}/${inputData}?${searchParams}`).then(
+    // return fetch(`${END_POINT}/${inputData}?fields=name,capital,population,flags,languages`).then(
     res => {
       // ??? Не знаю як перекинути помилку з потрібним текстом в такому варіанті:
       // if (!res.ok) {
