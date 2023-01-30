@@ -1,8 +1,7 @@
 // ! name.common замінити на name.official
 // ! Зробити клас і екземпляр класу
-import countries from './fetchCountries';
 import './css/styles.css';
-
+import countries from './fetchCountries';
 import Notiflix from 'notiflix';
 Notiflix.Notify.init({
   position: 'center-top',
@@ -12,21 +11,21 @@ Notiflix.Notify.init({
   fontSize: '16px',
 });
 
-// Робота з lodash.debounce
+// Підключаю lodash.debounce
 const debounce = require('lodash.debounce');
 const DEBOUNCE_DELAY = 300;
 
 const searchBox = document.getElementById('search-box');
-searchBox.addEventListener('input', debounce(checkCountries, DEBOUNCE_DELAY)); //робимо затримку у 300мс
+searchBox.addEventListener('input', debounce(checkCountries, DEBOUNCE_DELAY)); // Робимо затримку у 300мс
 searchBox.placeholder = 'Start type here country name';
 searchBox.style.width = '230px';
 
 // Фукнкція перевірки назви країни
 function checkCountries(e) {
-  const inputData = e.target.value.trim(); //дивимось у input, прибираємо пробіли на початку і в кінці
+  const inputData = e.target.value.trim(); // Дивимось у input, прибираємо пробіли на початку і в кінці
 
   if (!inputData) {
-    //якщо нічого немає, то чистимо розмітку і виходимо
+    // Якщо нічого немає, то чистимо розмітку і виходимо
     clearHTML();
     return;
   }
@@ -34,25 +33,26 @@ function checkCountries(e) {
   countries
     .fetchCountries(inputData) // викликаємо функцію запиту публічного API і передаємо їй введену у input назву країни
     .then(array => {
-      // ^Результат позитивного виконання промісу є масив об'єктів:
+      // ^ Результат позитивного виконання промісу є масив об'єктів:
       if (!array.length) {
-        //якщо довжина масиву нульова
+        // Якщо довжина масиву нульова
         throw new Error('Oops, there is no country with that name');
       } else if (array.length >= 10) {
-        //якщо довжина масиву >10
+        // Якщо довжина масиву >10
         throw new Error('Too many matches found. Please enter a more specific name.');
       } else if (array.length > 1 && array.length < 10) {
-        // * якщо довжина масиву від 2 до 10, то роблю список країн:
+        // Якщо довжина масиву від 2 до 10, то роблю список країн:
         return array.reduce((previousValue, currentValue) => {
-          return renderMarkupCountriesList(currentValue) + previousValue; // & повертає розмітку для кожного елементу масиву (об'єкт) і зшиває її
+          return renderMarkupCountriesList(currentValue) + previousValue; // & повертає розмітку для кожного елементу масиву (який є об'єктом) і зшиває її
         }, '');
       }
 
-      // * Якщо довжина масиву === 1, то вивожу дані по одній країні
+      // Якщо довжина масиву === 1, то вивожу дані по одній країні
       return renderMarkupCountryInfo(array); // & повертає розмітку для однієї країни
     })
     .then(markup => {
-      //перевіряю яка саме розмітка приходить - список чи одна країна:
+      // Перевіряю яка саме розмітка прийшла - для списку чи однієї країни:
+      // ??? Не знаю як інакше їх розрізнити
       if (markup.includes('</li>')) {
         // * Якщо так, то це перелік країн, значить роблю розмітку для переліку країн:
         clearHTML();
@@ -120,7 +120,7 @@ function renderMarkupCountryInfo(array) {
       capital,
       population,
       flags: { svg: flag },
-      languages, // це масив об'єктів
+      languages, // це масив об'єктів!
     },
   ] = array;
 
@@ -163,7 +163,7 @@ function renderMarkupCountryInfo(array) {
 function onError(error) {
   clearHTML();
 
-  // не придумав як інакше можна за типом помилки підставляти "info" чи "failure" у Nofify
+  // ??? Не придумав як інакше можна за типом помилки підставляти "info" чи "failure" у Nofify
   if (error.message.includes('Too')) {
     Notiflix.Notify.info(error.message);
   } else {
