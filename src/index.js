@@ -1,5 +1,5 @@
 // ! name.common замінити на name.official
-// ! Зробити клас і екземпляр класу
+// ! Зробити пагінацію (клас і екземпляр класу)
 import './css/styles.css';
 import countries from './fetchCountries';
 import Notiflix from 'notiflix';
