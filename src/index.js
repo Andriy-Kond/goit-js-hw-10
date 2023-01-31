@@ -15,10 +15,11 @@ Notiflix.Notify.init({
 const debounce = require('lodash.debounce');
 const DEBOUNCE_DELAY = 300;
 
+window.onload = () => document.querySelector('#search-box').focus();
 const searchBox = document.getElementById('search-box');
-searchBox.addEventListener('input', debounce(checkCountries, DEBOUNCE_DELAY)); // Робимо затримку у 300мс
 searchBox.placeholder = 'Start type here country name';
 searchBox.style.width = '230px';
+searchBox.addEventListener('input', debounce(checkCountries, DEBOUNCE_DELAY)); // Робимо затримку у 300мс
 
 // Фукнкція перевірки назви країни
 function checkCountries(e) {
@@ -101,41 +102,37 @@ function checkCountries(e) {
 }
 
 // Функція малювання розмітки переліку країн
-function renderMarkupCountriesList({ name, flags: { svg: flag } }) {
+function renderMarkupCountriesList({ name: { common: commonName }, flags: { svg: flag } }) {
   return `
     <li class = "country-item">
       <img src="${flag}" alt="flag.svg" class="country-flag-svg" />
-      <h2 class="country-name">${name}</h2>
+      <h2 class="country-name">${commonName}</h2>
     </li>
   `;
 }
 
 // Функція малювання розмітки однієї країни
-function renderMarkupCountryInfo(array) {
+function renderMarkupCountryInfo(res) {
   // ^ Нижче перезаписую ці змінні у випадку їх відсутності у базі, тому let, а не const
-  // Десктруктурізація масиву:
+  // Десктруктурізація масиву res:
+
   let [
     {
-      name,
-      capital,
+      name: { common: commonName },
+      capital, // це масив
       population,
       flags: { svg: flag },
-      languages, // це масив об'єктів!
+      languages, // це об'єкт
     },
-  ] = array;
+  ] = res;
 
-  // роблю з масиву мов рядок з комами
-  const countryLanguagesArr = [];
-  for (const lang of languages) {
-    countryLanguagesArr.push(lang.name);
-  }
-  const countryLanguages = countryLanguagesArr.join(', '); // кома після останнього значення не додається
+  let countryLanguages = Object.values(languages).join(', '); // кома після останнього значення не додається
 
   // ^ В базі відсутні деякі дані (undefined), тому перевіряю на наявність, щоби виводити зрозуміле повідомлення замість "undefined":
-  if (!name) {
-    name = 'Назва країни невідома';
+  if (!commonName) {
+    commonName = 'Назва країни невідома';
   }
-  if (!capital) {
+  if (capital.length === 0) {
     capital = 'Столиця не відома';
   }
   if (!flag) {
@@ -151,7 +148,7 @@ function renderMarkupCountryInfo(array) {
   return `
   <div class="country">
     <img src="${flag}" alt="flag.svg" class="country-flag-svg" width = "200px" />
-    <h2 class="country-name">${name}</h2>
+    <h2 class="country-name">${commonName}</h2>
   </div>
   <h3 class="country-capital">Capital: <span class="simpleText">${capital}</span></h3>
   <h3 class="country-population">Population: <span class="simpleText">${population}</span></h3>
