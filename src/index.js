@@ -33,30 +33,29 @@ function checkCountries(e) {
 
   countries
     .fetchCountries(inputData) // викликаємо функцію запиту публічного API і передаємо їй введену у input назву країни
-    .then(array => {
-      // ^ Результат позитивного виконання промісу є масив об'єктів:
-      if (!array.length) {
-        // Якщо довжина масиву нульова
-        throw new Error('Oops, there is no country with that name');
-      } else if (array.length >= 10) {
-        // Якщо довжина масиву >10
-        throw new Error('Too many matches found. Please enter a more specific name.');
-      } else if (array.length > 1 && array.length < 10) {
-        // Якщо довжина масиву від 2 до 10, то роблю список країн:
-        return array.reduce((previousValue, currentValue) => {
-          return renderMarkupCountriesList(currentValue) + previousValue; // & повертає розмітку для кожного елементу масиву (який є об'єктом) і зшиває її
-        }, '');
-      }
 
-      // Якщо довжина масиву === 1, то вивожу дані по одній країні
-      return renderMarkupCountryInfo(array); // & повертає розмітку для однієї країни
+    // ^ Результат позитивного виконання промісу є масив об'єктів:
+    .then(array => {
+      // Якщо довжина масиву нульова:
+      if (!array.length) {
+        throw new Error('Oops, there is no country with that name');
+      }
+      // Якщо довжина масиву > 10:
+      else if (array.length > 10) {
+        throw new Error('Too many matches found. Please enter a more specific name.');
+      }
+      // Якщо довжина менше 10, то викликаємо функцію малювання розмітки:
+      else {
+        return renderMarkupCountry(array); // передаємо отриманий з промісу масив.
+      }
     })
     .then(markup => {
       // Перевіряю яка саме розмітка прийшла - для списку чи однієї країни:
       // ??? Не знаю як інакше їх розрізнити
+      // * Якщо розмітка містить закриваючий тег </li>, то це перелік країн, значить додаю цю розмітку у ul.country-list:
+      clearHTML();
+
       if (markup.includes('</li>')) {
-        // * Якщо так, то це перелік країн, значить роблю розмітку для переліку країн:
-        clearHTML();
         document.querySelector('.country-list').innerHTML = markup;
 
         // додаю стилі для кожної <li>:
@@ -75,9 +74,8 @@ function checkCountries(e) {
         }
       }
 
-      // * Інакше роблю розмітку для однієї країни:
+      // * Інакше додаю цю розмітку у div.country-info:
       else {
-        clearHTML();
         document.querySelector('.country-info').innerHTML = markup;
 
         // додаю стилі:
@@ -91,7 +89,7 @@ function checkCountries(e) {
         img.style.marginRight = '20px';
         img.style.width = '50px';
 
-        // спамів з однаковим класом є декілька, тому перебираю їх циклом:
+        // спамів з однаковим класом є декілька, тому роблю стилі для них циклом:
         const simpleText = document.querySelectorAll('.simpleText');
         for (const span of simpleText) {
           span.style.font = 'caption';
@@ -101,21 +99,10 @@ function checkCountries(e) {
     .catch(onError);
 }
 
-// Функція малювання розмітки переліку країн
-function renderMarkupCountriesList({ name: { common: commonName }, flags: { svg: flag } }) {
-  return `
-    <li class = "country-item">
-      <img src="${flag}" alt="flag.svg" class="country-flag-svg" />
-      <h2 class="country-name">${commonName}</h2>
-    </li>
-  `;
-}
-
 // Функція малювання розмітки однієї країни
-function renderMarkupCountryInfo(res) {
+function renderMarkupCountry(res) {
   // ^ Нижче перезаписую ці змінні у випадку їх відсутності у базі, тому let, а не const
   // Десктруктурізація масиву res:
-
   let [
     {
       name: { common: commonName },
@@ -145,15 +132,39 @@ function renderMarkupCountryInfo(res) {
     countryLanguages = 'Дані про мови відсутні';
   }
 
-  return `
-  <div class="country">
-    <img src="${flag}" alt="flag.svg" class="country-flag-svg" width = "200px" />
-    <h2 class="country-name">${commonName}</h2>
-  </div>
-  <h3 class="country-capital">Capital: <span class="simpleText">${capital}</span></h3>
-  <h3 class="country-population">Population: <span class="simpleText">${population}</span></h3>
-  <h3 class="country-language">Languages: <span class="simpleText">${countryLanguages}</span></h3>
-  `;
+  // * Якщо довжина масиву від 2 до 10, то роблю розмітку для переліку країн:
+  if (res.length > 1) {
+    return res.reduce((previousValue, { name: { common: commonName }, flags: { svg: flag } }) => {
+      // ^ В базі відсутні деякі дані (undefined), тому перевіряю на наявність, щоби виводити зрозуміле повідомлення замість "undefined":
+      if (!commonName) {
+        commonName = 'Назва країни невідома';
+      }
+      if (!flag) {
+        flag = 'Прапор невідомий';
+      }
+
+      return (
+        `
+      <li class = "country-item">
+      <img src="${flag}" alt="flag.svg" class="country-flag-svg" />
+      <h2 class="country-name">${commonName}</h2>
+      </li>
+      ` + previousValue
+      ); // & повертає розмітку для кожного елементу масиву і зшиває її ;
+    }, '');
+  }
+  // * Інакше повертаю розмітку для однієї країни:
+  else {
+    return `
+    <div class="country">
+      <img src="${flag}" alt="flag.svg" class="country-flag-svg" width = "200px" />
+      <h2 class="country-name">${commonName}</h2>
+    </div>
+    <h3 class="country-capital">Capital: <span class="simpleText">${capital}</span></h3>
+    <h3 class="country-population">Population: <span class="simpleText">${population}</span></h3>
+    <h3 class="country-language">Languages: <span class="simpleText">${countryLanguages}</span></h3>
+    `;
+  }
 }
 
 // Функція обробки помилок
