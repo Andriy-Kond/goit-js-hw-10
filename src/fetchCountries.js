@@ -16,7 +16,7 @@ function fetchCountries(inputData) {
       //   throw new Error(res.statusText);
       //   console.log(res);
       // }
-      console.log('res :>> ', res);
+      // console.log('res :>> ', res);
       // console.log('res.json() :>> ', res.json());
 
       return res.json(); // ТУТ ПРОМІС
