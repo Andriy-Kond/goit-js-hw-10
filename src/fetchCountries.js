@@ -8,12 +8,17 @@ function fetchCountries(inputData) {
   return fetch(`${END_POINT}/${inputData}?${searchParams}`).then(
     //searchParams === fields=name,capital,population,flags,languages
     res => {
+      // if (res.status === 200) {
+      //   throw new Error('Too many matches found. Please enter a more specific name');
+      // }
       // ??? Не знаю як перекинути помилку з потрібним текстом в такому варіанті:
       // if (!res.ok) {
-      //   console.log(res);
       //   throw new Error(res.statusText);
+      //   console.log(res);
       // }
-      // console.log(res.json());
+      console.log('res :>> ', res);
+      // console.log('res.json() :>> ', res.json());
+
       return res.json(); // ТУТ ПРОМІС
     }
   );

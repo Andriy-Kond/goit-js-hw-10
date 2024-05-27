@@ -173,11 +173,15 @@ function renderMarkupCountry(res) {
 function onError(error) {
   clearHTML();
 
+  // Помилки є дві - одна з кодом 200 OK - "Too many matches found. Please enter a more specific name.". А друга з кодом 404  - "Failed to fetch".
+
   // ??? Не придумав як інакше можна за типом помилки підставляти "info" чи "failure" у Notify
   if (error.message.includes('Too')) {
     Notiflix.Notify.info(error.message);
+    console.dir('error :>> ', error);
   } else {
     Notiflix.Notify.failure(error.message);
+    console.dir('error :>> ', error);
   }
 }
 
