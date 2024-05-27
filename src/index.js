@@ -3,6 +3,7 @@
 import './css/styles.css';
 import countries from './fetchCountries';
 import Notiflix from 'notiflix';
+
 Notiflix.Notify.init({
   position: 'center-top',
   opacity: 0.8,
@@ -114,7 +115,7 @@ function renderMarkupCountriesList({ name: { common: commonName }, flags: { svg:
 // Функція малювання розмітки однієї країни
 function renderMarkupCountryInfo(res) {
   // ^ Нижче перезаписую ці змінні у випадку їх відсутності у базі, тому let, а не const
-  // Десктруктурізація масиву res:
+  // Деструктуризація масиву res:
 
   let [
     {
@@ -160,7 +161,7 @@ function renderMarkupCountryInfo(res) {
 function onError(error) {
   clearHTML();
 
-  // ??? Не придумав як інакше можна за типом помилки підставляти "info" чи "failure" у Nofify
+  // ??? Не придумав як інакше можна за типом помилки підставляти "info" чи "failure" у Notify
   if (error.message.includes('Too')) {
     Notiflix.Notify.info(error.message);
   } else {
